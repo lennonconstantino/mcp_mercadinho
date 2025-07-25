@@ -5,33 +5,33 @@
 [![MCP](https://img.shields.io/badge/MCP-1.7.1-green.svg)](https://modelcontextprotocol.io/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-orange.svg)](https://openai.com/)
 
-A sophisticated multi-agent AI system for Mercadinho Mercantes, a Brazilian retail chain. This system provides intelligent customer service through multiple specialized AI agents that can handle product inquiries, sales assistance, customer management, and store operations.
+A multi-agent AI system for Mercadinho Mercantes, a Brazilian retail chain. This system provides intelligent customer service through specialized AI agents that handle product inquiries, sales assistance, customer management, and store operations.
 
 ## 🏪 About Mercadinho Mercantes
 
-Mercadinho Mercantes is a proud Brazilian retail company with multiple locations across São Paulo and Rio de Janeiro. Our AI assistant system enhances customer experience by providing personalized product recommendations, promotional information, and seamless appointment scheduling.
+Mercadinho Mercantes is a Brazilian retail company with multiple locations. This AI assistant system enhances customer experience by providing product recommendations, promotional information, and appointment scheduling.
 
 ## ✨ Features
 
 ### 🤖 Multi-Agent Architecture
 - **Reception Agent**: Welcomes customers and directs them to appropriate services
 - **Sales Agent**: Handles product inquiries, recommendations, and sales assistance
-- **Customer Maintenance Agent**: Manages existing customer accounts and special discounts
+- **Customer Maintenance Agent**: Manages customer accounts and special discounts
 
 ### 🛍️ Core Functionality
-- **Product Catalog**: Browse available products with pricing and inventory
-- **Store Information**: Find store locations and contact details
-- **Promotional System**: Access store-specific promotions and discounts
-- **Customer Management**: Track customer profiles and loyalty benefits
-- **Appointment Scheduling**: Book store visits and product reservations
-- **Special Discounts**: Exclusive offers for registered customers
+- Product catalog browsing
+- Store information lookup
+- Promotional system (store-specific)
+- Customer management and loyalty benefits
+- Appointment scheduling for store visits and product reservations
+- Special discounts for registered customers
 
 ### 🛠️ Technical Features
-- **MCP Integration**: Model Context Protocol for tool calling
-- **Streamlit UI**: Modern, responsive web interface
-- **Real-time Chat**: Interactive conversation with AI agents
-- **Tool Visualization**: Transparent view of AI tool usage
-- **Session Management**: Persistent conversation history
+- MCP (Model Context Protocol) integration for tool calling
+- Streamlit UI for interactive chat
+- Real-time chat with AI agents
+- Tool usage visualization
+- Session management
 
 ## 🚀 Quick Start
 
@@ -57,18 +57,21 @@ Mercadinho Mercantes is a proud Brazilian retail company with multiple locations
    ```bash
    export OPENAI_API_KEY="your_openai_api_key_here"
    ```
-   
    Or create a `.env` file:
    ```bash
    echo "OPENAI_API_KEY=your_openai_api_key_here" > .env
    ```
 
+4. **Database setup**
+   - The application requires a pre-existing `loja_sistema.db` SQLite database with the correct schema. If you do not have this file, please request the schema or a setup script from the project maintainer. (The setup script is not included in this repository.)
+
 ### Running the Application
 
 1. **Start the MCP server** (in one terminal):
    ```bash
-   mcp run server.py --transport sse
+   python server.py
    ```
+   (By default, runs with stdio transport for local development.)
 
 2. **Launch the Streamlit client** (in another terminal):
    ```bash
@@ -101,7 +104,7 @@ Mercadinho Mercantes is a proud Brazilian retail company with multiple locations
 - **Responsibilities**:
   - Welcome customers to Mercadinho Mercantes
   - Present company information and website
-  - Route customers to appropriate specialized agents
+  - Route customers to specialized agents
   - Handle general inquiries
 
 #### Sales Agent (`VendasAssistente`)
@@ -127,25 +130,22 @@ Mercadinho Mercantes is a proud Brazilian retail company with multiple locations
 |------|-------------|------------|
 | `get_produtos_disponiveis()` | Retrieve available products | None |
 | `get_lojas()` | Get store locations and information | None |
-| `get_promocao_por_loja(id_loja)` | Get promotions for specific store | `id_loja: int` |
-| `get_info_cliente(nome)` | Get customer information | `nome: str` |
-| `reservar_pedido_com_desconto()` | Reserve order with discount | `id_loja, id_cliente, data_hora` |
-| `agenda_visita_para_compra()` | Schedule store visit | `id_loja, data_hora` |
+| `get_categorias_produtos_promocao_por_loja(id_loja)` | Get categories with promotions for a store | `id_loja: int` |
+| `get_promocao_por_loja(id_loja)` | Get product promotions for a store | `id_loja: int` |
+| `get_info_cliente(cliente_id, nome)` | Get customer information | `cliente_id: int, nome: str` |
+| `reservar_pedido_com_desconto(id_loja, id_cliente, data_hora)` | Reserve order with discount | `id_loja: int, id_cliente: int, data_hora: str` |
+| `agenda_visita_para_compra(id_loja, data_hora)` | Schedule store visit | `id_loja: int, data_hora: str` |
 
-## 📊 Data Structure
+## 📊 Data Structure (Example)
 
 ### Products
-- **Categories**: Hortifruit, Electronics
-- **Information**: ID, name, category, price, quantity
-- **Examples**: Bananas, Apples, PlayStation 5, LED TV
+- **Fields**: produto_id, nome, descricao, categoria_id, valor
 
 ### Stores
-- **Locations**: São Paulo (Parelheiros, Mooca), Guarujá, Santo André, Rio de Janeiro (Ipanema, Nova Iguaçu)
-- **Information**: ID, name, city, state
+- **Fields**: loja_id, nome, cidade, estado, bairro
 
 ### Customers
-- **Types**: Regular customers, Members (with special discounts)
-- **Information**: ID, name, associated store, discount eligibility
+- **Fields**: cliente_id, nome, sobrenome, cliente_socio, cidade, estado, cep, rua, numero, bairro, complemento
 
 ## 🎯 Usage Examples
 

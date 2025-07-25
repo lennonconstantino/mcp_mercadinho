@@ -1,57 +1,29 @@
+import sqlite3
 from mcp.server.fastmcp import FastMCP
 import json
+import asyncio
+from typing import Optional
 
 mcp = FastMCP("MercadinhoAssistente")
+
+def get_db_connection():
+    conn = sqlite3.connect('loja_sistema.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
 @mcp.tool()
 def get_produtos_disponiveis():
     """Retorna os produtos disponíveis no mercadinho para comprar"""
     try:
-        produtos = [
-            {
-                "id_produto": "1",
-                "nome": "banana",
-                "categoria": "hortifruit",
-                "valor": 10.0,
-                "quantidade":100,
-            },
-            {
-                "id_produto": "2",
-                "nome": "maca",
-                "categoria": "hortifruit",
-                "valor": 12.0,
-                "quantidade":500,
-            },
-            {
-                "id_produto": "3",
-                "nome": "pera",
-                "categoria": "hortifruit",
-                "valor": 12.4,
-                "quantidade":150,
-            },
-            {
-                "id_produto": "4",
-                "nome": "mamao",
-                "categoria": "hortifruit",
-                "valor": 15.0,
-                "quantidade":130,
-            },
-            {
-                "id_produto": "5",
-                "nome": "playstation 5",
-                "categoria": "eletronico",
-                "valor": 3500.0,
-                "quantidade":30,
-            },
-            {
-                "id_produto": "6",
-                "nome": "televisao led",
-                "categoria": "eletronico",
-                "valor": 5500.0,
-                "quantidade":10,
-            },
-        ]
-        return json.dumps(produtos, indent=4, sort_keys=True, default=str)
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT produto_id, nome, descricao, categoria_id, valor FROM produtos")
+        produtos = cursor.fetchall()
+        conn.close()
+
+        chaves = ["produto_id", "nome", "descricao", "categoria_id", "valor"]
+        result = [dict(zip(chaves, tupla)) for tupla in produtos]
+        return json.dumps(result, indent=4, sort_keys=True, default=str)
     except Exception as e:
         return {"error": str(e)}
 
@@ -59,141 +31,96 @@ def get_produtos_disponiveis():
 def get_lojas():
     """Retorna as lojas e suas informações de localização"""
     try:
-        lojas = [
-            {
-                "id_loja" : "1",
-                "nome": "loja Parelheiros",
-                "cidade": "São Paulo",
-                "estado": "São Paulo",
-            },
-            {
-                "id_loja" : "2",
-                "nome": "loja Guaruja",
-                "cidade": "Guaruja",
-                "estado": "São Paulo",
-            },
-            {
-                "id_loja" : "3",
-                "nome": "loja Santo Andre",
-                "cidade": "Santo Andre",
-                "estado": "São Paulo",
-            },
-            {
-                "id_loja" : "4",
-                "nome": "loja Mooca",
-                "cidade": "São Paulo",
-                "estado": "São Paulo",
-            },
-            {
-                "id_loja" : "5",
-                "nome": "loja Ipanema",
-                "cidade": "Rio de Janeiro",
-                "estado": "Rio de Janeiro",
-            },
-            {
-                "id_loja" : "6",
-                "nome": "loja Nova Iguaçu",
-                "cidade": "Nova Iguaçu",
-                "estado": "Rio de Janeiro",
-            },
-        ]
-        return json.dumps(lojas, indent=4, sort_keys=True, default=str)
-    except Exception as e:
-        return {"error": str(e)}
-
-@mcp.tool()
-def get_promocao_por_loja(id_loja: int):
-    """Retorna as promoções cadastradas nas lojas adquirintes"""
-    try:
-        promocoes = [
-            {
-                "id_loja" : "1",
-                "items": [
-                    { 
-                        "id_produto":"1",
-                        "nome": "banana",
-                        "desconto": "10%"
-                    },
-                    { 
-                        "id_produto":"5",
-                        "nome": "playstation 5",
-                        "desconto": "20%"
-                    },
-                ]
-            },
-            {
-                "id_loja" : "4",
-                "items": [
-                    { 
-                        "id_produto":"5",
-                        "nome": "playstation 5",
-                        "desconto": "20%"
-                    },
-                    { 
-                        "id_produto":"6",
-                        "nome": "televisao led",
-                        "desconto": "30%"
-                    },
-                ]
-            },      
-        ]
-        result = list(filter(lambda item: item["id_loja"] == str(id_loja), promocoes))
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT loja_id, nome, cidade, estado, bairro FROM lojas")
+        lojas = cursor.fetchall()
+        conn.close()
+        chaves = ["loja_id", "nome", "cidade", "estado", "bairro"]
+        result = [dict(zip(chaves, tupla)) for tupla in lojas]
         return json.dumps(result, indent=4, sort_keys=True, default=str)
     except Exception as e:
         return {"error": str(e)}
 
 @mcp.tool()
-def get_info_cliente(nome: str):
-    """Retorna as informações do cliente pelo nome. Retonar se o cliente está na base de clientes socios que lhes concendem o direito a participar dos super descontos negociados."""
+def get_categorias_produtos_promocao_por_loja(id_loja: int):
+    """Retorna as categorias de produtos com promoções cadastradas nas lojas adquirintes"""
     try:
-        clientes = [
-            {
-                "id_cliente": "1",
-                "nome": "John Lennon",
-                "id_loja" : "1",
-                "nome_loja": "loja Parelheiros",
-                "descontos": True,
-                "cidade": "São Paulo",
-                "estado": "São Paulo",
-            },
-            {
-                "id_cliente": "2",
-                "nome": "Mary Anne",
-                "id_loja" : "1",
-                "nome_loja": "loja Parelheiros",
-                "descontos": True,
-                "cidade": "São Paulo",
-                "estado": "São Paulo",
-            },
-            {
-                "id_cliente": "3",
-                "nome": "Jesus Christ",
-                "id_loja" : "1",
-                "nome_loja": "loja Parelheiros",
-                "descontos": True,
-                "cidade": "São Paulo",
-                "estado": "São Paulo",
-            },
-            {
-                "id_cliente": "4",
-                "nome": "Giovanni Martinelli",
-                "id_loja" : "4",
-                "nome_loja": "loja Mooca",
-                "descontos": True,
-                "cidade": "São Paulo",
-                "estado": "São Paulo",
-            },
-            {
-                "id_cliente": "4",
-                "nome": "Heinz Krauss",
-                "id_loja" : "4",
-                "nome_loja": "loja Mooca",
-                "descontos": False,
-                "cidade": "São Paulo",
-                "estado": "São Paulo",
-            },
-        ]
-        result = list(filter(lambda item: item["nome"] == str(nome), clientes))
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            select p.loja_id,
+                p2.produto_id,
+                p2.nome, 
+                c.categoria_id,
+                c.nome,
+                c.descricao
+                p2.valor,
+                p.desconto_loja, 
+                p.desconto_socio
+            from promocoes p
+            join categorias c
+                on p.categoria_id = c.categoria_id
+            join produtos p2
+                on c.categoria_id = p2.categoria_id
+            where 1=1
+            and p.loja_id = ?
+            and p.ativa = 1""", (id_loja,))
+        promocoes = cursor.fetchall()
+        conn.close()
+
+        chaves = ["loja_id", "produto_id", "nome", "categoria_id", "nome_categoria", "descricao", "valor", "desconto_loja", "desconto_socio"]
+        result = [dict(zip(chaves, tupla)) for tupla in promocoes]
+        return json.dumps(result, indent=4, sort_keys=True, default=str)
+    except Exception as e:
+        return {"error": str(e)}
+
+@mcp.tool()
+def get_promocao_por_loja(id_loja: int):
+    """Retorna os produtos com promoções cadastradas nas lojas adquirintes"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        #cursor.execute("select p.loja_id, p.promocao_id, pp.produto_id, p.nome, p.descricao, p.desconto_loja, p.desconto_socio from promocoes p join promocoes_produtos pp on p.promocao_id = pp.promocao_id")
+        cursor.execute("""
+            select p.loja_id, 
+                p.promocao_id, 
+                p.produto_id, 
+                p.categoria_id, 
+                pp.nome, 
+                pp.descricao,
+                pp.valor,
+                p.desconto_loja, 
+                p.desconto_socio
+            from promocoes p 
+            join produtos pp 
+                on p.produto_id = pp.produto_id 
+            where 1=1
+            and p.loja_id = ?
+            and p.ativa = 1
+            and p.categoria_id is null""", (id_loja,))
+        promocoes = cursor.fetchall()
+        conn.close()
+        
+        chaves = ["loja_id", "promocao_id", "produto_id", "categoria_id", "nome", "descricao", "valor", "desconto_loja", "desconto_socio"]
+        #result = list(filter(lambda item: item[0] == str(id_loja), promocoes))
+        result = [dict(zip(chaves, tupla)) for tupla in promocoes]
+        #result = list(filter(lambda item: item["loja_id"] == str(id_loja), result))
+        return json.dumps(result, indent=4, sort_keys=True, default=str)
+    except Exception as e:
+        return {"error": str(e)}
+
+@mcp.tool()
+def get_info_cliente(cliente_id: int, nome: str):
+    """Retorna as informações do cliente pelo código e nome. Retonar se o cliente está na base de clientes socios que lhes concendem o direito a participar dos super descontos negociados."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT cliente_id, nome, sobrenome, cliente_socio, cidade, estado, cep, rua, numero, bairro, complemento FROM clientes WHERE cliente_id = ? AND nome||' '||sobrenome LIKE ?", (cliente_id, nome,))
+        clientes = cursor.fetchall()
+        conn.close()
+        chaves = ["cliente_id", "nome", "sobrenome", "cliente_socio", "cidade", "estado", "cep", "rua", "numero", "bairro", "complemento"]
+        result = [dict(zip(chaves, tupla)) for tupla in clientes]
         return json.dumps(result, indent=4, sort_keys=True, default=str)
     except Exception as e:
         return {"error": str(e)}
@@ -202,7 +129,20 @@ def get_info_cliente(nome: str):
 def reservar_pedido_com_desconto(id_loja: int, id_cliente: int, data_hora: str):
     """Reservar para o cliente associado a compra de um item com desconto na loja"""
     try:
-        return {"message": "Reserva agendada com sucesso!"}
+        # TODO: Implementar lógica de reserva no banco de dados
+        # conn = get_db_connection()
+        # cursor = conn.cursor()
+        # cursor.execute("INSERT INTO reservas (loja_id, cliente_id, data_hora) VALUES (?, ?, ?)", 
+        #                (id_loja, id_cliente, data_hora))
+        # conn.commit()
+        # conn.close()
+        
+        return {
+            "message": "Reserva agendada com sucesso!",
+            "loja_id": id_loja,
+            "cliente_id": id_cliente,
+            "data_hora": data_hora
+        }
     except Exception as e:
         return {"error": str(e)}
 
@@ -210,8 +150,29 @@ def reservar_pedido_com_desconto(id_loja: int, id_cliente: int, data_hora: str):
 def agenda_visita_para_compra(id_loja: int, data_hora: str):
     """Reservar a visita de um cliente na loja para conhecer melhor os nossos produtos"""
     try:
-        # TODO
-        return {"message": "Reserva agendada com sucesso!"}
+        # TODO: Implementar lógica de agendamento de visita
+        # conn = get_db_connection()
+        # cursor = conn.cursor()
+        # cursor.execute("INSERT INTO visitas (loja_id, data_hora) VALUES (?, ?)", 
+        #                (id_loja, data_hora))
+        # conn.commit()
+        # conn.close()
+        return {
+            "message": "Visita agendada com sucesso!",
+            "loja_id": id_loja,
+            "data_hora": data_hora
+        }
     except Exception as e:
         return {"error": str(e)}
     
+if __name__ == "__main__":
+    # Para desenvolvimento local, usar stdio
+    mcp.run(transport="stdio")
+    
+    # Para servidor remoto, usar HTTP streamable (recomendado para produção)
+    # mcp.run(
+    #     transport="http",
+    #     host="127.0.0.1",
+    #     port=4200,
+    #     log_level="info"
+    # )

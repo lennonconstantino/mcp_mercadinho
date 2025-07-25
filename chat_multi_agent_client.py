@@ -59,7 +59,7 @@ if "agentRecepcao" not in st.session_state:
             model="gpt-4-1106-preview",
             handoff_description="Assistente para trativa de vendas, informações sobre produtos e agendamento de visitas e reservas de pedidos com descontos.",
             instructions="Você é um assistente da Mercadinho Mercantes que deve ajudar e convencer o cliente a comprar um produto." \
-                "Antes de tudo use a ferramenta get_produtos_disponiveis para conhecer as opções disponíveis e apresentar a ele. " \
+                "Antes de tudo use a ferramenta get_produtos_disponiveis ou a ferramenta get_categorias_produtos_promocao_por_loja conforme a necessidade para conhecer as opções disponíveis e apresentar a ele. " \
                 "Você pode fazer perguntas para entender o que o cliente precisa e oferecer as melhores opções de produtos baseado na ferramenta que você chamou. " \
                 "Quando o cliente decidir, agende uma visita na loja mais próxima do cliente, para descobrir as lojas use get_lojas " \
                 "e para descobrir os itens/produtos dessa loja use get_promoção_por_loja. " \

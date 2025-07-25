@@ -21,6 +21,18 @@
                 "run",
                 "/Users/lennon/projects/ai_engineering/MCP_mercadinho/chat_multi_agent_client.py"
             ]
+        },
+        {
+            "name": "debug server",
+            "type": "python",
+            "request": "launch",
+            "program": "/Users/lennon/projects/ai_engineering/MCP_mercadinho/.venv/bin/mcp", 
+            "args": [
+                "run",
+                "/Users/lennon/projects/ai_engineering/MCP_mercadinho/server.py",
+                "--transport",
+                "sse"
+            ]
         }
     ]
 }
